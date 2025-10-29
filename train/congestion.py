@@ -14,7 +14,10 @@ import lightgbm as lgb
 from sklearn.metrics import classification_report, confusion_matrix, roc_auc_score
 from torch.utils.data import DataLoader, TensorDataset
 
+import sys
+import os
 from utils import *
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from Autoencoder import Autoencoder, weights_init
 
 def get_windowed_data(embeddings_array, windowed, window_size, row_indices):
@@ -101,7 +104,8 @@ def main():
     train_embeddings, train_labels, train_row_indices = get_embeddings_labels(train_files, json_data, file_embedding_data, use_context)
     test_embeddings, test_labels, test_row_indices = get_embeddings_labels(test_files, json_data, file_embedding_data, use_context)
 
-    with open('../trained_models/scaler.pkl', 'rb') as f:
+    scaler_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'scaler.pkl'))
+    with open(scaler_path, 'rb') as f:
         scaler = joblib.load(f)
 
     test_embeddings = scaler.transform(test_embeddings)
@@ -115,7 +119,8 @@ def main():
     train_embeddings_tensor = torch.tensor(train_embeddings, dtype=torch.float32).to(device)
     test_embeddings_tensor = torch.tensor(test_embeddings, dtype=torch.float32).to(device)
 
-    autoencoder = torch.load('../trained_models/autoencoder.pth')
+    autoencoder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'autoencoder.pth'))
+    autoencoder = torch.load(autoencoder_path)
     autoencoder.to(device)
     
     autoencoder.eval()
@@ -195,10 +200,12 @@ def main():
     print(roc_auc_score(y_test, y_prob))
 
     # Save the XGBoost model
-    joblib.dump(xgb_model, '../trained_models/xgb_model_congestion.pkl')
+    xgb_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'xgb_model_congestion.pkl'))
+    joblib.dump(xgb_model, xgb_model_path)
 
     # Save the LightGBM model
-    lgb_model.save_model('../trained_models/lgb_model_congestion.txt')
+    lgb_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'lgb_model_congestion.txt'))
+    lgb_model.save_model(lgb_model_path)
 
 
 if __name__ == "__main__":

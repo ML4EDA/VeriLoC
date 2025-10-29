@@ -8,8 +8,12 @@ import numpy as np
 import xgboost as xgb
 import lightgbm as lgb
 
+import sys
+import os
 from utils import *
-from train.congestion import *
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'train')))
+from congestion import get_windowed_data
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from Autoencoder import Autoencoder, weights_init
 
 if len(sys.argv) != 2:
@@ -75,13 +79,15 @@ infer_labels_array = np.array(infer_labels)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using device: {device}")
 
-with open('../trained_models/scaler.pkl', 'rb') as f:
+scaler_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'scaler.pkl'))
+with open(scaler_path, 'rb') as f:
     scaler = joblib.load(f)
 
 # Scale the infer embeddings
 scaled_infer_embeddings = scaler.transform(infer_embeddings_array)
 
-autoencoder = torch.load('../trained_models/autoencoder.pth')
+autoencoder_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'autoencoder.pth'))
+autoencoder = torch.load(autoencoder_path)
 autoencoder.to(device)
 
 autoencoder.eval()
@@ -94,15 +100,18 @@ infer_embeddings_no_window = infer_embeddings
 
 infer_embeddings_no_window = get_windowed_data(infer_embeddings_no_window, False, window_size, infer_row_indices)
 
-lgb_model = lgb.Booster(model_file='../trained_models/lgb_model_congestion.txt')
+lgb_model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'lgb_model_congestion.txt'))
+lgb_model = lgb.Booster(model_file=lgb_model_path)
 
 y_prob = lgb_model.predict(infer_embeddings)
 y_pred = (y_prob > 0.5).astype(int)
 
-with open('../trained_models/timing_regressor.pkl', 'rb') as f:
+timing_regressor_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'timing_regressor.pkl'))
+with open(timing_regressor_path, 'rb') as f:
     timing_pred_model = joblib.load(f)
 
-with open('../trained_models/timing_y_scaler.pkl', 'rb') as f:
+timing_y_scaler_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'timing_y_scaler.pkl'))
+with open(timing_y_scaler_path, 'rb') as f:
     y_scaler = joblib.load(f)
 
 # Print the anomalies based on y_prob

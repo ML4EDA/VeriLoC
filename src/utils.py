@@ -56,7 +56,7 @@ def write_csv(file_path, header, rows):
         csvwriter.writerows(rows)
 
 def get_congestion_timing_data(file_type='congestion'):
-    congestion_data_dir = f"../dataset/{file_type}/openROAD_low_level_modules_yosys_v1"
+    congestion_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'dataset', file_type, 'openROAD_low_level_modules_yosys_v1'))
 
     congestion_txt_files = []
     for root, dirs, files in os.walk(congestion_data_dir):
@@ -64,8 +64,8 @@ def get_congestion_timing_data(file_type='congestion'):
             if file.endswith(f"{file_type}.txt"):
                 congestion_txt_files.append(os.path.join(root, file))
 
-    embeddings_data_dir = "../embeddings/openROAD_low_level_modules_yosys_v1_embeddings"
-    rtl_dataset_dir = "../dataset"
+    embeddings_data_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'embeddings', 'openROAD_low_level_modules_yosys_v1_embeddings'))
+    rtl_dataset_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'dataset'))
 
     print(f"Number of {file_type} reports found: {len(congestion_txt_files)}\n\nRemoving duplicates...")
 
@@ -125,7 +125,7 @@ def get_congestion_timing_data(file_type='congestion'):
     return json_data
 
 def load_module_embeddings():
-    embeddings_save_path = '../embeddings/hidden_states_modules.npz'
+    embeddings_save_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'embeddings', 'hidden_states_modules.npz'))
     file_embedding_data = np.load(embeddings_save_path)
 
     updated_data = {}
@@ -137,16 +137,26 @@ def load_module_embeddings():
     file_embedding_data = updated_data
     return file_embedding_data
 
-def get_train_test_files():
+def get_train_test_files(json_data=None):
     # File paths
-    train_files_path = '../trained_models/train_files_congestion.pkl'
-    test_files_path = '../trained_models/test_files_congestion.pkl'
+    train_files_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'train_files_congestion.pkl'))
+    test_files_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'trained_models', 'test_files_congestion.pkl'))
 
-    # Load train files
-    with open(train_files_path, 'rb') as f:
-        train_files = pickle.load(f)
+    # Load train files if files exist
+    if os.path.exists(train_files_path) and os.path.exists(test_files_path):
+        with open(train_files_path, 'rb') as f:
+            train_files = pickle.load(f)
 
-    # Load test files
-    with open(test_files_path, 'rb') as f:
-        test_files = pickle.load(f)
-    return train_files, test_files
+        with open(test_files_path, 'rb') as f:
+            test_files = pickle.load(f)
+        return train_files, test_files
+    else:
+        # If files don't exist, create dummy train/test split from json_data
+        if json_data is not None:
+            all_files = list(json_data.keys())
+            split_idx = int(0.8 * len(all_files))
+            train_files = all_files[:split_idx]
+            test_files = all_files[split_idx:]
+            return train_files, test_files
+        else:
+            return [], []
