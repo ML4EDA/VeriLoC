@@ -70,12 +70,14 @@ python inference/timing.py <verilog file path>
 If you use VeriLoC in your research or project, please cite it using the following BibTeX entry:
 
 ```bibtex
-@misc{hemadri2025veriloclineofcodelevelprediction,
-      title={VeriLoC: Line-of-Code Level Prediction of Hardware Design Quality from Verilog Code}, 
-      author={Raghu Vamshi Hemadri and Jitendra Bhandari and Andre Nakkab and Johann Knechtel and Badri P Gopalan and Ramesh Narayanaswamy and Ramesh Karri and Siddharth Garg},
-      year={2025},
-      eprint={2506.07239},
-      archivePrefix={arXiv},
-      primaryClass={cs.AR},
-      url={https://arxiv.org/abs/2506.07239}, 
+@inproceedings{NEURIPS2025_141ad4ee,
+ author = {Hemadri, Raghu Vamshi and Bhandari, Jitendra and Nakkab, Andre and Knechtel, Johann and Gopalan, Badri and Narayanaswamy, Ramesh and Karri, Ramesh and Garg, Siddharth},
+ booktitle = {Advances in Neural Information Processing Systems},
+ editor = {D. Belgrave and C. Zhang and H. Lin and R. Pascanu and P. Koniusz and M. Ghassemi and N. Chen},
+ pages = {13541--13568},
+ publisher = {Curran Associates, Inc.},
+ title = {VeriLoC: Line-of-Code Level Prediction of Hardware Design Quality from Verilog Code},
+ url = {https://proceedings.neurips.cc/paper_files/paper/2025/file/141ad4ee52ba0b1db87483cb8f173c4e-Paper-Conference.pdf},
+ volume = {38},
+ year = {2025}
 }
